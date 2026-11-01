@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snowpuff — тёплый снег на рабочем столе</title>
+  <meta name="description" content="Snowpuff для macOS и Windows: тёплый снег падает по экрану, оседает на окнах, Dock и панели задач и разлетается от курсора.">
+  <meta name="theme-color" content="#1E110B">
+  <meta property="og:title" content="Snowpuff — на рабочем столе идёт снег">
+  <meta property="og:description" content="Тёплый снег для macOS и Windows: падает, оседает на окнах, разлетается от курсора.">
+  <meta property="og:image" content="assets/icon-512.png">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Alegreya+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="snow" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" href="#top">Snowpuff</a>
+    <nav>
+      <a href="https://github.com/ehroz1/Snowpuff">GitHub</a>
+      <a href="#download">Скачать</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="lamp lamp--hero" aria-hidden="true">
+        <span class="lamp__rail"></span>
+        <span class="lamp__shade"></span>
+        <span class="lamp__beam"></span>
+      </div>
+
+      <div class="hero__copy">
+        <p class="eyebrow">Snowpuff для macOS и Windows</p>
+        <h1 class="display">На рабочем<br>столе идёт<br>снег.</h1>
+        <p class="lead">Тёплый снег падает по экрану, оседает на окнах, Dock и&nbsp;панели задач и&nbsp;соскальзывает, когда двигаешь окно. Смахни сугроб курсором.</p>
+        <div class="buttons">
+          <a class="btn btn--primary" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff.dmg">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.8-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.4-1-2.4-3.9zM14 5.2c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>
+            Скачать для macOS
+          </a>
+          <a class="btn" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff-Setup.exe">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.1 10.4 4v7.1H3V5.1zm0 13.8 7.4 1.1v-7H3v5.9zM11.3 3.9 21 2.5v8.6h-9.7V3.9zm0 16.2 9.7 1.4v-8.5h-9.7v7.1z"/></svg>
+            Windows
+          </a>
+        </div>
+        <p class="fine">macOS 14 и новее, Apple Silicon и Intel · Windows 10 или 11 · бесплатно, <a href="https://github.com/ehroz1/Snowpuff">открытый код</a></p>
+      </div>
+
+      <p class="hint">Попробуй: смахни сугроб курсором.</p>
+      <div class="ledge" data-surface="ledge" data-seed="17"></div>
+    </section>
+
+    <!-- On your windows -->
+    <section class="windows">
+      <div class="lamp lamp--windows" aria-hidden="true">
+        <span class="lamp__rail"></span>
+        <span class="lamp__shade"></span>
+        <span class="lamp__beam"></span>
+      </div>
+
+      <div class="windows__grid">
+        <article class="card glow" id="card" data-surface="window" data-seed="13" data-icicles>
+          <div class="card__bar" id="card-bar" title="Потяни и дёрни окно">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="card__body">
+            <p class="eyebrow">На твоих окнах</p>
+            <h2 class="display display--md">Ложится там,<br>где упал.</h2>
+            <p>Снег собирается на верхних краях окон, на&nbsp;Dock и&nbsp;панели задач, повторяя их скруглённые углы. Дёрни окно, и&nbsp;снег с&nbsp;него соскользнёт, а&nbsp;сосульки слетят и&nbsp;разобьются. Закрой или сверни окно, и&nbsp;снег упадёт в&nbsp;сугроб ниже.</p>
+          </div>
+        </article>
+
+        <div class="menu-wrap">
+          <div class="menu" id="menu" role="menu" aria-label="Меню Snowpuff" data-surface="window" data-seed="8">
+            <p class="menu__header">Снегопад</p>
+            <button role="menuitemradio" data-rate="off">Выкл</button>
+            <button role="menuitemradio" data-rate="light">Лёгкий</button>
+            <button role="menuitemradio" data-rate="steady">Ровный</button>
+            <button role="menuitemradio" data-rate="heavy">Метель</button>
+            <button role="menuitemradio" data-rate="variable">Переменный</button>
+            <hr>
+            <button role="menuitemcheckbox" data-toggle="accumulate">Сугробы</button>
+            <button role="menuitemcheckbox" data-toggle="melt">Таяние</button>
+            <button role="menuitemcheckbox" data-toggle="onWindows">Снег на окнах</button>
+            <button role="menuitemcheckbox" data-toggle="icicles">Сосульки</button>
+            <button role="menuitemcheckbox" data-toggle="warm">Тёплый свет окна</button>
+            <button role="menuitem" data-action="clear">Смести весь снег</button>
+            <hr>
+            <button role="menuitemcheckbox" data-toggle="puff">Подуть на снег (микрофон)</button>
+            <hr>
+            <button role="menuitem" data-action="quit">Выйти из Snowpuff <kbd>⌘Q</kbd></button>
+          </div>
+          <p class="menu-note">Это меню работает. Включи метель и&nbsp;выключи таяние, чтобы сугроб рос, потом дёрни окно за&nbsp;заголовок. Или включи микрофон и&nbsp;подуй на&nbsp;экран.</p>
+        </div>
+      </div>
+
+      <div class="ledge" data-surface="ledge" data-seed="15"></div>
+    </section>
+
+    <!-- What the snow does -->
+    <section class="does">
+      <h2 class="display display--md does__title">Что делает<br>снег</h2>
+      <dl class="does__list">
+        <div><dt>Падает</dt><dd>У каждой снежинки свой темп, и&nbsp;она покачивается на&nbsp;лёгком ветру. Пять видов снегопада, от&nbsp;лёгкого до&nbsp;метели; «Переменный» сам то&nbsp;усиливается, то&nbsp;стихает.</dd></div>
+        <div><dt>Оседает</dt><dd>Копится и&nbsp;оползает в&nbsp;естественный откос внизу экрана, на&nbsp;каждом окне, над которым есть место, на&nbsp;Dock и&nbsp;панели задач.</dd></div>
+        <div><dt>Разлетается</dt><dd>Проведи курсором по&nbsp;сугробу, и&nbsp;он расступится брызгами. Дёрни окно, и&nbsp;снег соскользнёт с&nbsp;него вниз.</dd></div>
+        <div><dt>Звенит</dt><dd>Под окнами со&nbsp;снегом растут сосульки. Если дёрнуть, закрыть или свернуть окно, они слетают и&nbsp;разбиваются.</dd></div>
+        <div><dt>Греется</dt><dd>Активное окно светится тёплым светом, как окно на&nbsp;иконке, и&nbsp;снег рядом с&nbsp;ним теплеет.</dd></div>
+        <div><dt>Слушает</dt><dd>Включи микрофон и&nbsp;подуй на&nbsp;экран: снег разлетится. Ничего не&nbsp;записывается.</dd></div>
+        <div><dt>Шумит</dt><dd>Ветер, камин или оба сразу. Звук синтезируется на&nbsp;лету, громкость настраивается в&nbsp;меню.</dd></div>
+        <div><dt>Тает</dt><dd>С&nbsp;включённым таянием сугроб медленно оттаивает и&nbsp;никогда не&nbsp;заваливает экран целиком.</dd></div>
+        <div><dt>Прячется</dt><dd>Когда другое приложение включает камеру или микрофон, снег и&nbsp;звук плавно исчезают. На&nbsp;скриншотах его нет, если не&nbsp;включить «Показывать на&nbsp;скриншотах».</dd></div>
+        <div><dt>Бережёт</dt><dd>На&nbsp;батарее и&nbsp;в&nbsp;режиме энергосбережения рисует реже и&nbsp;скромнее. Обновляется сам и&nbsp;ждёт, пока закончится созвон.</dd></div>
+      </dl>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="download">
+      <h2 class="display display--xl">Пусть ляжет.</h2>
+      <div class="buttons">
+        <a class="btn btn--primary" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff.dmg">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.8-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.4-1-2.4-3.9zM14 5.2c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>
+          Скачать для macOS
+        </a>
+        <a class="btn" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff-Setup.exe">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.1 10.4 4v7.1H3V5.1zm0 13.8 7.4 1.1v-7H3v5.9zM11.3 3.9 21 2.5v8.6h-9.7V3.9zm0 16.2 9.7 1.4v-8.5h-9.7v7.1z"/></svg>
+          Windows
+        </a>
+      </div>
+      <div class="install">
+        <p><b>macOS.</b> Открой <code>Snowpuff.dmg</code> и&nbsp;запусти Snowpuff, он сам переедет в&nbsp;«Программы». Приложение не&nbsp;подписано сертификатом Apple, поэтому при первом запуске открой «Системные настройки → Конфиденциальность и&nbsp;безопасность» и&nbsp;нажми «Всё равно открыть».</p>
+        <p><b>Windows.</b> Запусти <code>Snowpuff-Setup.exe</code>, права администратора не&nbsp;нужны. Если SmartScreen предупредит о&nbsp;неизвестном издателе, нажми «Подробнее → Выполнить в&nbsp;любом случае».</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="footer__brand"><img src="assets/icon.png" alt="" width="22" height="22"> Snowpuff</span>
+    <span class="footer__links">
+      <a href="https://t.me/hhrrzz1">Поддержать автора ♥</a>
+      <a href="https://ehroz.pro">Другие приложения</a>
+      <a href="https://github.com/ehroz1/Snowpuff">Исходники на GitHub</a>
+    </span>
+    <span class="footer__credit">Основан на <a href="https://github.com/mbezruchko/Snowhush">Snowhush</a> (MIT)</span>
+  </footer>
+
+  <script src="snow.js"></script>
+</body>
+</html>
