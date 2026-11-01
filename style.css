@@ -208,6 +208,9 @@ section { position: relative; }
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 190, 110, .32), rgba(255, 170, 90, .08) 38%, rgba(255, 170, 90, 0) 62%);
 }
+/* in the hero the window hangs higher, with a longer beam down to the snow */
+.hero .scene { height: calc(var(--win) * .97 + 200px); }
+@media (max-width: 960px) { .hero .scene { height: calc(var(--win) * .97 + 110px); } }
 .scene__window {
   position: absolute;
   left: 50%; top: 0;
