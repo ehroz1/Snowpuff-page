@@ -51,14 +51,14 @@
     el,
     kind: el.dataset.surface,
     seed: +el.dataset.seed || 0,
-    max: el.dataset.surface === "ledge" ? 34 : 24,
+    max: +el.dataset.max || (el.dataset.surface === "ground" ? 36 : 24),
     h: new Float32Array(0),
     width: 0,
     rect: null,
     pageX: null, pageY: null, vx: 0, vy: 0,
     spillL: 0, spillR: 0,
     icicles: [],
-    hasIcicles: el.hasAttribute("data-icicles") || el.dataset.surface === "ledge",
+    hasIcicles: el.hasAttribute("data-icicles"),
   }));
 
   function noise(i, seed) {
@@ -83,9 +83,9 @@
     s.width = rect.width;
     s.icicles = [];
     if (s.hasIcicles) {
-      const gap = s.kind === "ledge" ? 150 : 46;
+      const gap = rect.width < 400 ? 26 : 46;
       for (let x = 18 + Math.random() * gap; x < rect.width - 14; x += gap * (0.5 + Math.random())) {
-        const max = 6 + Math.random() ** 1.6 * (s.kind === "ledge" ? 34 : 24);
+        const max = 6 + Math.random() ** 1.6 * (rect.width < 400 ? 20 : 24);
         s.icicles.push({ x, len: s.seed ? Math.random() * max * 0.7 : 0, max, w: 2.2 + Math.random() * 2.6 });
       }
     }
@@ -349,10 +349,10 @@
 
   // ---------- drawing ----------
   function beams() {
-    return [...document.querySelectorAll(".lamp")].map((lamp) => {
-      const shade = lamp.querySelector(".lamp__shade").getBoundingClientRect();
-      const beam = lamp.querySelector(".lamp__beam").getBoundingClientRect();
-      return { x: shade.left + shade.width / 2, y: shade.bottom, spread: beam.width / 2, reach: beam.height };
+    // light falling from a window: a trapezoid, narrow at the top
+    return [...document.querySelectorAll("[data-beam]")].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top, top: (r.width / 2) * (1 - +el.dataset.beam), spread: r.width / 2, reach: r.height };
     }).filter((b) => b.y + b.reach > 0 && b.y < H);
   }
 
@@ -369,7 +369,7 @@
       let img = SNOW, a = f.alpha * 0.8;
       for (const b of lights) {
         const dy = f.y - b.y;
-        if (dy > 0 && dy < b.reach && Math.abs(f.x - b.x) < 6 + (b.spread * 0.82 * dy) / b.reach) {
+        if (dy > -20 && dy < b.reach && Math.abs(f.x - b.x) < b.top + ((b.spread - b.top) * Math.max(0, dy)) / b.reach) {
           img = LIT; a = Math.min(1, f.alpha * 1.5 * (1 - (dy / b.reach) * 0.5)); break;
         }
       }
@@ -411,7 +411,7 @@
     for (let i = 0; i < n; i++) if (h[i] > 0.25) { any = true; break; }
     if (!any) return;
 
-    const base = r.top + (s.kind === "ledge" ? 1 : 0.5);
+    const base = r.top + 0.5;
     const inset = s.kind === "window" ? 3 : 0;
     const x0 = r.left + inset, x1 = r.right - inset;
     const step = (x1 - x0) / (n - 1);
@@ -431,8 +431,12 @@
 
     const g = ctx.createLinearGradient(0, base - s.max, 0, base);
     g.addColorStop(0, "#FFF8EE");
-    g.addColorStop(0.55, "#F6E4D2");
-    g.addColorStop(1, "#C99A80");
+    if (s.kind === "ground") {
+      g.addColorStop(1, "#F3DCC6");
+    } else {
+      g.addColorStop(0.6, "#F6E4D2");
+      g.addColorStop(1, "#E2BFA4");
+    }
     ctx.fillStyle = g;
     ctx.shadowColor = "rgba(255, 207, 148, 0.35)";
     ctx.shadowBlur = 10;
