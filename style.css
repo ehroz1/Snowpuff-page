@@ -1,4 +1,19 @@
 /* Snowpuff. A cold blue night; the only warm thing is the window. */
+@font-face {
+  font-family: "Medeo Sans";
+  src: url("assets/fonts/MedeoSansVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Medeo Sans";
+  src: url("assets/fonts/MedeoSansVariable-Italic.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --night-950: #0b1017;
   --night-900: #111823;
@@ -15,8 +30,9 @@
   --amber: #f2b45c;
   --amber-hi: #f7c47a;
   --cocoa: #2a160d;
-  --serif: "Lora", Georgia, "Times New Roman", serif;
-  --sans: "Golos Text", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  /* Medeo Sans (SIL OFL 1.1, assets/fonts/OFL.txt); its optical size axis tightens it into Display at large sizes */
+  --serif: "Medeo Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --sans: "Medeo Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --gutter: clamp(18px, 5vw, 64px);
   --win: clamp(240px, 27vw, 390px);
   --ground: clamp(110px, 12vw, 150px);
@@ -37,7 +53,7 @@ body {
 }
 a { color: inherit; }
 img { display: block; }
-h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; color: var(--cream); }
+h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 600; letter-spacing: -0.025em; color: var(--cream); }
 h1 em, h2 em { font-style: italic; color: var(--amber); }
 button { font: inherit; }
 
@@ -137,7 +153,7 @@ section { position: relative; }
   background: linear-gradient(var(--night-950), #142030 55%, #1c2a3e);
 }
 .hero__title { grid-area: title; align-self: start; padding-top: 24px; position: relative; z-index: 3; }
-.hero h1 { font-size: clamp(42px, 4.4vw, 68px); line-height: 1.04; letter-spacing: -0.01em; }
+.hero h1 { font-size: clamp(42px, 4.4vw, 68px); line-height: 1.02; letter-spacing: -0.035em; }
 .hero h1 em { display: block; }
 .hero__scene { grid-area: scene; align-self: end; position: relative; z-index: 2; }
 .hero__copy { grid-area: copy; align-self: end; padding-bottom: 48px; position: relative; z-index: 3; }
