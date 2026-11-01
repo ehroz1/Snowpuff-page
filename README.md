@@ -1,6 +1,6 @@
 # Snowpuff — сайт
 
-Лендинг для [Snowpuff](https://github.com/ehroz1/Snowpuff): тёплый снег на рабочем столе macOS и Windows.
+Лендинг для [Snowpuff](https://github.com/ehroz1/Snowpuff), живёт на https://snowpuff.ehroz.pro. Другие приложения автора — на [ehroz.pro](https://ehroz.pro): тёплый снег на рабочем столе macOS и Windows.
 
 Статический сайт без сборки: `index.html`, `style.css`, `snow.js`. Чтобы посмотреть локально, открой `index.html`
 в браузере. Для публикации подойдёт GitHub Pages (Settings → Pages → Deploy from a branch, корень репозитория).
