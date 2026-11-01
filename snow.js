@@ -37,14 +37,15 @@
     const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
     grad.addColorStop(0, color);
     grad.addColorStop(0.35, color);
-    grad.addColorStop(1, "rgba(255,240,220,0)");
+    grad.addColorStop(1, color.replace(/[\d.]+\)$/, "0)"));
     g.fillStyle = grad;
     g.fillRect(0, 0, size, size);
     return c;
   }
-  const SNOW = sprite("rgba(255,243,226,1)", 32);
+  const SNOW = sprite("rgba(226,234,245,1)", 32);   // cold, outside the light
   const LIT = sprite("rgba(255,246,220,1)", 32);
   const WARM = sprite("rgba(255,214,150,1)", 32);
+  const page = document.documentElement;
 
   // ---------- surfaces ----------
   const surfaces = [...document.querySelectorAll("[data-surface]")].map((el) => ({
@@ -134,7 +135,9 @@
       rate = 60 + swell * 760;
     }
     const area = (W * H) / (1440 * 900);
-    return Math.round(rate * area * 0.75 * (reduceMotion ? 0.3 : 1));
+    // it snows harder the further down the page you get
+    const depth = Math.min(1, scrollY / Math.max(1, page.scrollHeight - H));
+    return Math.round(rate * area * 0.75 * (1 + depth * 0.9) * (reduceMotion ? 0.3 : 1));
   }
 
   // ---------- simulation ----------
@@ -396,7 +399,7 @@
       ctx.translate(sh.x, sh.y);
       ctx.rotate(sh.rot);
       ctx.globalAlpha = Math.min(1, sh.life * 2);
-      ctx.fillStyle = "rgba(255,246,228,.85)";
+      ctx.fillStyle = "rgba(236,242,250,.85)";
       ctx.beginPath();
       ctx.moveTo(-sh.w / 2, 0); ctx.lineTo(sh.w / 2, 0); ctx.lineTo(0, sh.len);
       ctx.closePath(); ctx.fill();
@@ -430,20 +433,20 @@
     ctx.closePath();
 
     const g = ctx.createLinearGradient(0, base - s.max, 0, base);
-    g.addColorStop(0, "#FFF8EE");
+    g.addColorStop(0, "#F7F9FC");
     if (s.kind === "ground") {
-      g.addColorStop(1, "#F3DCC6");
+      g.addColorStop(1, "#DCE3EC");
     } else {
-      g.addColorStop(0.6, "#F6E4D2");
-      g.addColorStop(1, "#E2BFA4");
+      g.addColorStop(0.6, "#E9EEF5");
+      g.addColorStop(1, "#C7D1DE");
     }
     ctx.fillStyle = g;
-    ctx.shadowColor = "rgba(255, 207, 148, 0.35)";
+    ctx.shadowColor = "rgba(190, 210, 235, 0.3)";
     ctx.shadowBlur = 10;
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    ctx.strokeStyle = "rgba(255, 252, 244, 0.9)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -454,9 +457,9 @@
       if (ic.len < 1) continue;
       const x = r.left + ic.x, y = r.bottom - 1;
       const g = ctx.createLinearGradient(0, y, 0, y + ic.len);
-      g.addColorStop(0, "rgba(255,248,236,.95)");
-      g.addColorStop(0.6, "rgba(255,236,206,.6)");
-      g.addColorStop(1, "rgba(255,226,190,0)");
+      g.addColorStop(0, "rgba(244,248,253,.95)");
+      g.addColorStop(0.6, "rgba(214,226,242,.6)");
+      g.addColorStop(1, "rgba(200,215,235,0)");
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.moveTo(x - ic.w / 2, y);
@@ -567,7 +570,16 @@
 
   // ---------- menu ----------
   const menu = document.getElementById("menu");
+  const puffButtons = document.querySelectorAll("[data-puff-toggle]");
+  async function togglePuff() {
+    if (settings.puff) { settings.puff = false; stopMic(); }
+    else { settings.puff = await startMic(); }
+    sync();
+  }
+  puffButtons.forEach((b) => b.addEventListener("click", togglePuff));
+
   function sync() {
+    puffButtons.forEach((b) => b.setAttribute("aria-pressed", String(settings.puff)));
     for (const b of menu.querySelectorAll("[data-rate]")) b.setAttribute("aria-checked", String(b.dataset.rate === settings.rate));
     for (const b of menu.querySelectorAll("[data-toggle]")) b.setAttribute("aria-checked", String(!!settings[b.dataset.toggle]));
     card.classList.toggle("glow", settings.warm);
@@ -579,8 +591,7 @@
     if (b.dataset.toggle) {
       const key = b.dataset.toggle;
       if (key === "puff") {
-        if (settings.puff) { settings.puff = false; stopMic(); }
-        else { settings.puff = await startMic(); }
+        await togglePuff();
       } else {
         settings[key] = !settings[key];
       }

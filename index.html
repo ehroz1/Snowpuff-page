@@ -3,205 +3,299 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Snowpuff — тёплый снег на рабочем столе</title>
-  <meta name="description" content="Snowpuff для macOS и Windows: тёплый снег падает по экрану, оседает на окнах, Dock и панели задач и разлетается от курсора.">
-  <meta name="theme-color" content="#1E110B">
+  <title data-i18n="meta.title">Snowpuff — на рабочем столе идёт снег</title>
+  <meta name="description" data-i18n-attr="content:meta.description" content="Snowpuff для macOS и Windows: тихий тёплый снег поверх всех окон. Ложится на края окон, копится в сугробы и разлетается от курсора.">
+  <meta name="author" content="ehroz — ehroz.pro">
+  <meta name="theme-color" content="#111823">
   <meta property="og:title" content="Snowpuff — на рабочем столе идёт снег">
-  <meta property="og:description" content="Тёплый снег для macOS и Windows: падает, оседает на окнах, разлетается от курсора.">
+  <meta property="og:description" content="Тёплый снег для macOS и Windows: ложится на окна, копится в сугробы, разлетается от курсора.">
   <meta property="og:image" content="https://snowpuff.ehroz.pro/assets/icon-512.png">
   <meta property="og:url" content="https://snowpuff.ehroz.pro/">
   <meta property="og:site_name" content="Snowpuff — ehroz.pro">
   <link rel="canonical" href="https://snowpuff.ehroz.pro/">
-  <meta name="author" content="ehroz — ehroz.pro">
+  <link rel="alternate" hreflang="ru" href="https://snowpuff.ehroz.pro/?lang=ru">
+  <link rel="alternate" hreflang="en" href="https://snowpuff.ehroz.pro/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://snowpuff.ehroz.pro/">
   <link rel="author" href="https://ehroz.pro">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="apple-touch-icon" href="assets/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
 </head>
 <body>
   <canvas id="snow" aria-hidden="true"></canvas>
-  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Shared drawing: the room behind the glass, the curtains with their stitched ornament. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <radialGradient id="room" cx="0.6" cy="0.72" r="0.8"><stop offset="0" stop-color="#fff4d6"/><stop offset="0.5" stop-color="#ffcf7a"/><stop offset="1" stop-color="#d9803a"/></radialGradient>
+      <radialGradient id="room-night" cx="0.66" cy="0.78" r="0.7"><stop offset="0" stop-color="#ffe2a8"/><stop offset="0.45" stop-color="#e89a4c"/><stop offset="1" stop-color="#8a4424"/></radialGradient>
+      <pattern id="ornament" width="9" height="11" patternUnits="userSpaceOnUse">
+        <path d="M4.5 1.5 L7.5 5.5 L4.5 9.5 L1.5 5.5 Z" fill="none" stroke="#f0a070" stroke-width=".7" opacity=".55"/>
+        <path d="M4.5 4.3 v2.4 M3.3 5.5 h2.4" stroke="#ffe0a0" stroke-width=".6" opacity=".7"/>
+      </pattern>
+      <clipPath id="pane"><rect width="116" height="112" rx="9"/></clipPath>
+      <g id="curtains">
+        <path d="M0 0 L31 0 Q20 44 25 112 L0 112 Z" fill="#9c3a28"/>
+        <path d="M0 0 L31 0 Q20 44 25 112 L0 112 Z" fill="url(#ornament)"/>
+        <path d="M29 2 Q19 44 23.5 110" fill="none" stroke="#ffd9a0" stroke-width=".8" stroke-dasharray="1.6 1.8" opacity=".75"/>
+        <path d="M116 0 L85 0 Q96 44 91 112 L116 112 Z" fill="#9c3a28"/>
+        <path d="M116 0 L85 0 Q96 44 91 112 L116 112 Z" fill="url(#ornament)"/>
+        <path d="M87 2 Q97 44 92.5 110" fill="none" stroke="#ffd9a0" stroke-width=".8" stroke-dasharray="1.6 1.8" opacity=".75"/>
+      </g>
+      <g id="frame">
+        <rect width="116" height="112" rx="9" fill="none" stroke="#170b07" stroke-width="10"/>
+        <line x1="58" y1="0" x2="58" y2="112" stroke="#170b07" stroke-width="8"/>
+        <line x1="0" y1="54" x2="116" y2="54" stroke="#170b07" stroke-width="8"/>
+      </g>
+    </defs>
+  </svg>
 
   <header class="nav">
-    <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="34" height="34"> Snowpuff</a>
+    <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="28" height="28"> Snowpuff</a>
     <nav>
-      <a href="https://ehroz.pro">ehroz.pro</a>
-      <a href="https://github.com/ehroz1/Snowpuff">GitHub</a>
-      <a class="nav__cta" href="#download">Скачать</a>
+      <a href="https://ehroz.pro" class="hide-sm">ehroz.pro</a>
+      <a href="https://github.com/ehroz1/Snowpuff" class="hide-sm">GitHub</a>
+      <button class="lang" type="button" data-lang-switch aria-label="Switch language">EN</button>
     </nav>
   </header>
 
   <main id="top">
-    <!-- Hero: the icon's scene -->
+    <!-- Hero -->
     <section class="hero">
-      <div class="bokeh" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="hero__title">
+        <h1 data-i18n="hero.title">На рабочем столе <em>идёт снег</em></h1>
+      </div>
+
+      <div class="hero__scene">
+        <div class="scene" aria-hidden="true">
+          <div class="scene__halo"></div>
+          <div class="scene__beam" data-beam="0.6"></div>
+          <div class="scene__window">
+            <span class="scene__cap" data-surface="window" data-seed="24" data-max="36"></span>
+            <svg viewBox="0 0 116 112" class="scene__glass">
+              <rect width="116" height="112" rx="9" fill="url(#room)"/>
+              <g clip-path="url(#pane)">
+                <use href="#curtains"/>
+                <g class="cat">
+                  <path d="M30 112 Q29 95 34 89 L32 80 L37.5 85 L42.5 85 L48 80 L46 89 Q51 95 50 112 Z" fill="#3a1b10"/>
+                  <path class="cat__tail" d="M50 108 Q60 106 56 97" stroke="#3a1b10" stroke-width="3" fill="none" stroke-linecap="round"/>
+                </g>
+                <g>
+                  <ellipse cx="80" cy="96" rx="14" ry="10" fill="#fff6dc" opacity=".55"/>
+                  <path d="M71 98 L89 98 L85 85 L75 85 Z" fill="#6b2f1d"/>
+                  <rect x="78.6" y="98" width="2.8" height="10" fill="#6b2f1d"/>
+                  <rect x="74" y="108" width="12" height="4" rx="2" fill="#6b2f1d"/>
+                </g>
+              </g>
+              <use href="#frame"/>
+            </svg>
+            <span class="scene__sill" data-surface="window" data-seed="4" data-max="12" data-icicles></span>
+          </div>
+          <div class="scene__pool"></div>
+        </div>
+      </div>
 
       <div class="hero__copy">
-        <p class="eyebrow">Для macOS и Windows · бесплатно</p>
-        <h1 class="title">На рабочем столе идёт снег</h1>
-        <p class="lead">Тёплый снег падает по экрану, оседает на окнах, Dock и&nbsp;панели задач, растит сосульки и&nbsp;разлетается от&nbsp;курсора.</p>
-        <div class="buttons">
-          <a class="btn btn--primary" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff.dmg">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.8-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.4-1-2.4-3.9zM14 5.2c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>
-            Скачать для macOS
-          </a>
-          <a class="btn" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff-Setup.exe">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.1 10.4 4v7.1H3V5.1zm0 13.8 7.4 1.1v-7H3v5.9zM11.3 3.9 21 2.5v8.6h-9.7V3.9zm0 16.2 9.7 1.4v-8.5h-9.7v7.1z"/></svg>
-            Windows
-          </a>
+        <p class="lead" data-i18n="hero.lead">Тихий тёплый снег поверх всех окон. Ложится на&nbsp;их края, копится в&nbsp;сугробы и&nbsp;разлетается, если провести мышкой.</p>
+        <div class="download">
+          <a class="btn" data-download href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff.dmg"><span data-dl-label>Скачать для macOS</span></a>
+          <button type="button" class="link" data-os-other>или для Windows</button>
         </div>
-        <p class="fine">macOS 14+, Apple Silicon и Intel · Windows 10 и 11 · <a href="https://github.com/ehroz1/Snowpuff">открытый код</a> · от <a href="https://ehroz.pro">ehroz.pro</a></p>
+        <p class="fine"><span data-req>macOS 14+</span> · <span data-i18n="hero.free">бесплатно</span> · <a href="https://github.com/ehroz1/Snowpuff" data-i18n="hero.source">открытый код</a></p>
       </div>
 
-      <div class="scene" aria-hidden="true">
-        <div class="scene__halo"></div>
-        <div class="scene__beam" data-beam="0.62"></div>
-        <div class="scene__window">
-          <span class="scene__cap" data-surface="window" data-seed="30" data-max="36"></span>
-          <svg viewBox="0 0 116 112" class="scene__glass">
-            <defs>
-              <radialGradient id="room" cx="0.62" cy="0.7" r="0.75"><stop offset="0" stop-color="#fff6dc"/><stop offset="0.55" stop-color="#ffd27e"/><stop offset="1" stop-color="#e98f3e"/></radialGradient>
-              <clipPath id="pane"><rect width="116" height="112" rx="10"/></clipPath>
-            </defs>
-            <rect width="116" height="112" rx="10" fill="url(#room)"/>
-            <g clip-path="url(#pane)">
-              <path d="M0 0 L30 0 Q20 42 24 112 L0 112 Z" fill="#9c3a28" opacity=".88"/>
-              <path d="M116 0 L86 0 Q96 42 92 112 L116 112 Z" fill="#9c3a28" opacity=".88"/>
-              <g class="cat">
-                <path d="M26 112 Q25 94 30 88 L28 80 L33 84 L38 84 L43 80 L41 88 Q46 94 45 112 Z" fill="#3a1b10"/>
-                <path class="cat__tail" d="M45 108 Q54 106 50 98" stroke="#3a1b10" stroke-width="3" fill="none" stroke-linecap="round"/>
-              </g>
-              <g class="table-lamp">
-                <path d="M72 98 L92 98 L87 84 L77 84 Z" fill="#6b2f1d"/>
-                <rect x="80.5" y="98" width="3" height="10" fill="#6b2f1d"/>
-                <rect x="75" y="108" width="14" height="4" rx="2" fill="#6b2f1d"/>
-              </g>
-            </g>
-            <rect x="0" y="0" width="116" height="112" rx="10" fill="none" stroke="#1a0c08" stroke-width="11"/>
-            <line x1="58" y1="0" x2="58" y2="112" stroke="#1a0c08" stroke-width="10"/>
-            <line x1="0" y1="56" x2="116" y2="56" stroke="#1a0c08" stroke-width="10"/>
-          </svg>
-          <span class="scene__sill" data-surface="window" data-seed="5" data-max="12" data-icicles></span>
-        </div>
-      </div>
+      <p class="hero__aside" data-i18n="hero.aside">А&nbsp;вот и&nbsp;сугроб.<br>Проведи по&nbsp;нему курсором</p>
+      <svg class="arrow" viewBox="0 0 60 70" aria-hidden="true"><path d="M8 4 C 30 10, 44 26, 40 58 M30 50 L40 60 L48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 
-      <div class="ground" aria-hidden="true">
-        <span class="ground__top" data-surface="ground" data-seed="22" data-max="40"></span>
-        <span class="ground__pool"></span>
-        <span class="spark" style="left:44%;top:38%"></span>
-        <span class="spark" style="left:66%;top:22%"></span>
-        <span class="spark" style="left:57%;top:62%"></span>
+      <div class="ground ground--hero" aria-hidden="true">
+        <span class="ground__top" data-surface="ground" data-seed="16" data-max="40"></span>
       </div>
-      <p class="hint">Попробуй: проведи курсором по&nbsp;сугробу</p>
     </section>
 
     <!-- On your windows -->
     <section class="windows">
-      <div class="section-head">
-        <p class="eyebrow">На твоих окнах</p>
-        <h2 class="title title--md">Ложится там, где упал</h2>
+      <div class="windows__text">
+        <p class="kicker" data-i18n="win.kicker">На окнах</p>
+        <h2 data-i18n="win.title">Ложится туда, где упал</h2>
+        <p data-i18n="win.body">Снег оседает на&nbsp;краях окон, на&nbsp;Dock и&nbsp;панели задач. Дёрни окно за&nbsp;заголовок&nbsp;— снег соскользнёт, а&nbsp;сосульки слетят.</p>
       </div>
 
-      <div class="windows__grid">
-        <article class="card glow" id="card" data-surface="window" data-seed="16" data-icicles>
-          <div class="card__bar" id="card-bar" title="Потяни и дёрни окно">
-            <span></span><span></span><span></span>
-            <em>Потяни и дёрни меня</em>
+      <div class="windows__stage">
+        <article class="app" id="card" data-surface="window" data-seed="12" data-icicles>
+          <div class="app__bar" id="card-bar">
+            <span class="app__dots"><i></i><i></i><i></i></span>
+            <span class="app__name" data-i18n="win.file">мандарины.txt</span>
+            <span class="app__hint" data-i18n="win.hint">дёрни меня</span>
           </div>
-          <div class="card__body">
-            <p>Снег собирается на&nbsp;верхних краях окон, на&nbsp;Dock и&nbsp;панели задач, повторяя их скруглённые углы.</p>
-            <p>Дёрни окно, и&nbsp;снег с&nbsp;него соскользнёт, а&nbsp;сосульки слетят и&nbsp;разобьются. Закрой или сверни окно, и&nbsp;снег упадёт в&nbsp;сугроб ниже.</p>
+          <div class="app__body" data-i18n="win.note">
+            <p>— купить мандарины</p>
+            <p>— найти гирлянду</p>
+            <p>— <s>убрать снег с&nbsp;окна</s> пусть лежит</p>
           </div>
         </article>
 
         <div class="menu-wrap">
-          <div class="menu" id="menu" role="menu" aria-label="Меню Snowpuff" data-surface="window" data-seed="7">
-            <p class="menu__header">Снегопад</p>
-            <button role="menuitemradio" data-rate="off">Выкл</button>
-            <button role="menuitemradio" data-rate="light">Лёгкий</button>
-            <button role="menuitemradio" data-rate="steady">Ровный</button>
-            <button role="menuitemradio" data-rate="heavy">Метель</button>
-            <button role="menuitemradio" data-rate="variable">Переменный</button>
+          <div class="menu" id="menu" role="menu" aria-label="Snowpuff" data-surface="window" data-seed="6">
+            <p class="menu__header" data-i18n="m.snowfall">Снегопад</p>
+            <button role="menuitemradio" data-rate="off" data-i18n="m.off">Выкл</button>
+            <button role="menuitemradio" data-rate="light" data-i18n="m.light">Лёгкий</button>
+            <button role="menuitemradio" data-rate="steady" data-i18n="m.steady">Ровный</button>
+            <button role="menuitemradio" data-rate="heavy" data-i18n="m.heavy">Метель</button>
+            <button role="menuitemradio" data-rate="variable" data-i18n="m.variable">Переменный</button>
             <hr>
-            <button role="menuitemcheckbox" data-toggle="accumulate">Сугробы</button>
-            <button role="menuitemcheckbox" data-toggle="melt">Таяние</button>
-            <button role="menuitemcheckbox" data-toggle="onWindows">Снег на окнах</button>
-            <button role="menuitemcheckbox" data-toggle="icicles">Сосульки</button>
-            <button role="menuitemcheckbox" data-toggle="warm">Тёплый свет окна</button>
-            <button role="menuitem" data-action="clear">Смести весь снег</button>
+            <button role="menuitemcheckbox" data-toggle="accumulate" data-i18n="m.accumulate">Сугробы</button>
+            <button role="menuitemcheckbox" data-toggle="melt" data-i18n="m.melt">Таяние</button>
+            <button role="menuitemcheckbox" data-toggle="onWindows" data-i18n="m.onWindows">Снег на окнах</button>
+            <button role="menuitemcheckbox" data-toggle="icicles" data-i18n="m.icicles">Сосульки</button>
+            <button role="menuitemcheckbox" data-toggle="warm" data-i18n="m.warm">Тёплый свет окна</button>
+            <button role="menuitem" data-action="clear" data-i18n="m.clear">Смести весь снег</button>
             <hr>
-            <button role="menuitemcheckbox" data-toggle="puff">Подуть на снег (микрофон)</button>
+            <button role="menuitemcheckbox" data-toggle="puff" data-i18n="m.puff">Подуть на снег (микрофон)</button>
             <hr>
-            <a role="menuitem" href="https://t.me/hhrrzz1">Поддержать автора ♥</a>
-            <a role="menuitem" href="https://ehroz.pro">Другие приложения — ehroz.pro</a>
+            <a role="menuitem" href="https://t.me/hhrrzz1" data-i18n="m.support">Поддержать автора ♥</a>
+            <a role="menuitem" href="https://ehroz.pro" data-i18n="m.more">Другие приложения — ehroz.pro</a>
             <hr>
-            <button role="menuitem" data-action="quit">Выйти из Snowpuff <kbd>⌘Q</kbd></button>
+            <button role="menuitem" data-action="quit"><span data-i18n="m.quit">Выйти из Snowpuff</span> <kbd>⌘Q</kbd></button>
           </div>
-          <p class="menu-note">Это меню работает. Включи метель и&nbsp;выключи таяние, чтобы сугроб рос, или включи микрофон и&nbsp;подуй на&nbsp;экран.</p>
+          <p class="menu-note" data-i18n="win.menuNote">Меню настоящее, как в&nbsp;приложении. Включи метель, выключи таяние и&nbsp;смотри, как растёт сугроб.</p>
         </div>
       </div>
     </section>
 
-    <!-- What the snow does -->
-    <section class="does">
-      <div class="section-head">
-        <p class="eyebrow">Что умеет</p>
-        <h2 class="title title--md">Что делает снег</h2>
+    <!-- Features -->
+    <section class="features">
+      <h2 class="features__title" data-i18n="f.title">Что ещё он умеет</h2>
+
+      <div class="feature feature--sweep">
+        <div class="feature__text">
+          <h3 data-i18n="f.sweep.title">Разлетается</h3>
+          <p data-i18n="f.sweep.body">Проведи по&nbsp;сугробу. Да, прямо по&nbsp;этому.</p>
+        </div>
+        <div class="demo" aria-hidden="true">
+          <span class="ground__top" data-surface="ground" data-seed="30" data-max="46"></span>
+        </div>
       </div>
-      <ul class="tiles">
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/></svg></span><h3>Падает</h3><p>У&nbsp;каждой снежинки свой темп и&nbsp;лёгкое покачивание. Пять видов снегопада, от&nbsp;лёгкого до&nbsp;метели.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M2 18c3-4 6-5 10-3s7 1 10-2M2 22h20"/></svg></span><h3>Оседает</h3><p>Копится естественным откосом внизу экрана, на&nbsp;каждом окне, на&nbsp;Dock и&nbsp;панели задач.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M5 3l6 16 2.5-6.5L20 10z"/></svg></span><h3>Разлетается</h3><p>Проведи курсором по&nbsp;сугробу, и&nbsp;он расступится брызгами. Дёрни окно, и&nbsp;снег соскользнёт.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M3 4h18M6 4l1.5 9L9 4M12 4l1.5 14L15 4M18 4l.8 6 .7-6"/></svg></span><h3>Звенит</h3><p>Под окнами со&nbsp;снегом растут сосульки. Дёрни, закрой или сверни окно, и&nbsp;они разобьются.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 4v16M4 12h16"/></svg></span><h3>Греется</h3><p>Активное окно светится тёплым светом, как окно на&nbsp;иконке, и&nbsp;снег рядом теплеет.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/></svg></span><h3>Слушает</h3><p>Включи микрофон и&nbsp;подуй на&nbsp;экран: снег разлетится. Ничего не&nbsp;записывается.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M12 21c-4 0-6-3-6-6 0-4 4-6 4-11 3 2 4 4 4 6 1-1 1.5-2 1.5-3 2 2 2.5 4.5 2.5 6.5 0 4-2 7.5-6 7.5z"/></svg></span><h3>Шумит</h3><p>Ветер, камин или оба сразу. Звук синтезируется на&nbsp;лету, громкость в&nbsp;меню.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg></span><h3>Тает</h3><p>С&nbsp;таянием сугроб медленно оттаивает и&nbsp;никогда не&nbsp;заваливает экран целиком.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 22 12a14 14 0 0 1-3 3.6M6.6 6.6A14 14 0 0 0 2 12s3.5 7 10 7c1.6 0 3-.4 4.3-1"/></svg></span><h3>Прячется</h3><p>На&nbsp;созвонах снег и&nbsp;звук плавно исчезают. На&nbsp;скриншотах его нет, если не&nbsp;попросить.</p></li>
-        <li><span class="tile__icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 11v2M6 10v4M9.5 10v4"/></svg></span><h3>Бережёт</h3><p>На&nbsp;батарее и&nbsp;в&nbsp;энергосбережении рисует скромнее. Обновляется сам и&nbsp;ждёт конца созвона.</p></li>
-      </ul>
+
+      <div class="feature feature--icicles">
+        <svg class="icicles-art" viewBox="0 0 360 210" aria-hidden="true">
+          <defs>
+            <linearGradient id="ice" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset="1" stop-color="#b9c7da" stop-opacity=".15"/></linearGradient>
+          </defs>
+          <rect x="-10" y="-40" width="300" height="104" rx="10" fill="url(#room-night)"/>
+          <rect x="-10" y="-40" width="300" height="104" rx="10" fill="none" stroke="#170b07" stroke-width="12"/>
+          <line x1="140" y1="-40" x2="140" y2="64" stroke="#170b07" stroke-width="10"/>
+          <path d="M-20 62 Q40 56 120 61 T300 60 L304 76 Q150 82 -20 78 Z" fill="#eef2f8"/>
+          <path d="M-20 66 Q60 61 150 65 T302 64" fill="none" stroke="#ffffff" stroke-width="2" opacity=".8"/>
+          <g fill="url(#ice)" stroke="#e8eef7" stroke-width=".6" stroke-opacity=".6">
+            <path d="M18 77 C19 96, 21 112, 23 128 C25 110, 27 95, 29 78 Z"/>
+            <path d="M52 78 C53 90, 55 98, 56 106 C57 98, 59 89, 61 78 Z"/>
+            <path d="M84 79 C86 104, 88 132, 91 162 C93 132, 96 104, 99 79 Z"/>
+            <path d="M120 79 C121 88, 122 93, 123 98 C124 93, 126 87, 127 79 Z"/>
+            <path d="M150 79 C152 99, 154 118, 157 140 C159 117, 162 98, 164 79 Z"/>
+            <path d="M196 78 C197 87, 199 94, 200 100 C201 93, 203 86, 204 78 Z"/>
+            <path d="M226 78 C228 96, 230 112, 233 124 C235 110, 237 94, 239 78 Z"/>
+            <path d="M266 77 C267 85, 268 90, 269 94 C270 89, 271 84, 273 77 Z"/>
+          </g>
+          <circle cx="91" cy="172" r="2.4" fill="#dfe8f4"/>
+          <g stroke="#dfe8f4" stroke-width="1.4" stroke-linecap="round" opacity=".8">
+            <path d="M300 196 l-10 -6 M304 192 l2 -10 M310 197 l9 -4 M296 200 l-6 2"/>
+          </g>
+          <path d="M297 168 L301 186 L306 170" fill="none" stroke="#e8eef7" stroke-width="1.2" opacity=".7"/>
+        </svg>
+        <div class="feature__text">
+          <h3 data-i18n="f.ice.title">Обрастает сосульками</h3>
+          <p data-i18n="f.ice.body">Под окнами, где лежит снег, медленно растут сосульки. Дёрнешь окно&nbsp;— оборвутся и&nbsp;разобьются.</p>
+        </div>
+      </div>
+
+      <div class="feature feature--mic">
+        <svg class="mic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/></svg>
+        <p><b data-i18n="f.mic.title">Слушает.</b> <span data-i18n="f.mic.body">Подуй на&nbsp;экран&nbsp;— и&nbsp;снег разлетится. Микрофон ловит только дуновение и&nbsp;ничего не&nbsp;записывает.</span></p>
+        <button type="button" class="btn btn--ghost" data-puff-toggle aria-pressed="false" data-i18n="f.mic.try">Подуть</button>
+      </div>
+
+      <p class="spec" data-i18n="f.spec">Пять видов снегопада · сугробы на&nbsp;Dock и&nbsp;панели задач · тёплый свет активного окна · ветер и&nbsp;камин · прячется на&nbsp;созвонах и&nbsp;скриншотах · тает, а&nbsp;не&nbsp;заваливает экран · бережёт батарею · обновляется сам</p>
     </section>
 
-    <!-- CTA -->
-    <section class="cta" id="download">
-      <img class="cta__icon" src="assets/icon-512.png" alt="Иконка Snowpuff" width="168" height="168">
-      <h2 class="title title--xl">Пусть ляжет</h2>
-      <p class="lead lead--center">Snowpuff живёт в&nbsp;строке меню или в&nbsp;трее и&nbsp;обновляется сам.</p>
-      <div class="buttons buttons--center">
-        <a class="btn btn--primary" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff.dmg">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.8-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.4-1-2.4-3.9zM14 5.2c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>
-          Скачать для macOS
-        </a>
-        <a class="btn" href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff-Setup.exe">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.1 10.4 4v7.1H3V5.1zm0 13.8 7.4 1.1v-7H3v5.9zM11.3 3.9 21 2.5v8.6h-9.7V3.9zm0 16.2 9.7 1.4v-8.5h-9.7v7.1z"/></svg>
-          Windows
-        </a>
+    <!-- Closing scene: the same window, much later -->
+    <section class="finale" id="download">
+      <h2 data-i18n="end.title">Пока ты листал, навалило</h2>
+      <p class="finale__sub" data-i18n="end.sub">Кот уже уснул. Забирай снег себе.</p>
+
+      <div class="scene scene--late" aria-hidden="true">
+        <div class="scene__halo"></div>
+        <div class="scene__beam" data-beam="0.6"></div>
+        <div class="scene__window">
+          <span class="scene__cap" data-surface="window" data-seed="40" data-max="52"></span>
+          <svg viewBox="0 0 116 112" class="scene__glass">
+            <rect width="116" height="112" rx="9" fill="url(#room-night)"/>
+            <g clip-path="url(#pane)">
+              <use href="#curtains"/>
+              <g fill="#3a1b10">
+                <ellipse cx="42" cy="108" rx="15" ry="8.5"/>
+                <circle cx="29" cy="104" r="6.5"/>
+                <path d="M24.5 100 L25 93 L29 98 Z M30 98 L34 93 L34.5 100 Z"/>
+                <path d="M55 110 Q50 117 31 112" stroke="#3a1b10" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+              </g>
+              <g class="zzz" fill="#6b2f1d" font-family="Lora, serif" font-style="italic">
+                <text x="34" y="88" font-size="7">z</text>
+                <text x="39" y="80" font-size="9">z</text>
+              </g>
+              <g>
+                <ellipse cx="80" cy="96" rx="10" ry="7" fill="#ffe2a8" opacity=".35"/>
+                <path d="M71 98 L89 98 L85 85 L75 85 Z" fill="#5a2616"/>
+                <rect x="78.6" y="98" width="2.8" height="10" fill="#5a2616"/>
+                <rect x="74" y="108" width="12" height="4" rx="2" fill="#5a2616"/>
+              </g>
+            </g>
+            <use href="#frame"/>
+          </svg>
+          <span class="scene__sill" data-surface="window" data-seed="9" data-max="16" data-icicles></span>
+        </div>
+        <div class="scene__pool"></div>
       </div>
-      <div class="install">
-        <div><h3>macOS</h3><p>Открой <code>Snowpuff.dmg</code> и&nbsp;запусти Snowpuff, он сам переедет в&nbsp;«Программы». Приложение не&nbsp;подписано сертификатом Apple, поэтому при первом запуске открой «Системные настройки → Конфиденциальность и&nbsp;безопасность» и&nbsp;нажми «Всё равно открыть».</p></div>
-        <div><h3>Windows</h3><p>Запусти <code>Snowpuff-Setup.exe</code>, права администратора не&nbsp;нужны. Если SmartScreen предупредит о&nbsp;неизвестном издателе, нажми «Подробнее → Выполнить в&nbsp;любом случае».</p></div>
+
+      <div class="ground ground--finale">
+        <span class="ground__top" data-surface="ground" data-seed="30" data-max="56"></span>
+        <div class="install">
+          <div class="install__row">
+            <span class="drift-btn">
+              <span class="ground__top" data-surface="ground" data-seed="5" data-max="9"></span>
+              <a class="btn btn--deep" data-download href="https://github.com/ehroz1/Snowpuff/releases/latest/download/Snowpuff.dmg"><span data-dl-label>Скачать для macOS</span></a>
+            </span>
+            <span class="os-switch" role="radiogroup" aria-label="OS">
+              <button type="button" role="radio" data-os="mac">macOS</button><button type="button" role="radio" data-os="win">Windows</button>
+            </span>
+            <span class="install__req" data-req-long>macOS 14 и новее, Apple Silicon и Intel</span>
+          </div>
+          <details class="help">
+            <summary data-i18n="help.summary">Не открывается?</summary>
+            <p data-help="mac" data-i18n="help.mac">Приложение не&nbsp;подписано сертификатом Apple, поэтому при первом запуске macOS его остановит. Открой «Системные настройки → Конфиденциальность и&nbsp;безопасность» и&nbsp;нажми «Всё равно открыть». Это нужно один раз.</p>
+            <p data-help="win" data-i18n="help.win" hidden>Права администратора не&nbsp;нужны. Если SmartScreen предупредит о&nbsp;неизвестном издателе, нажми «Подробнее → Выполнить в&nbsp;любом случае».</p>
+          </details>
+        </div>
       </div>
-      <p class="more">Snowpuff сделан <a href="https://ehroz.pro">ehroz</a>. Другие приложения автора — на&nbsp;<a href="https://ehroz.pro">ehroz.pro</a></p>
     </section>
   </main>
 
   <footer class="footer">
-    <span class="ground__top" data-surface="ground" data-seed="18" data-max="40"></span>
-    <span class="ground__pool ground__pool--footer"></span>
     <div class="footer__inner">
-      <span class="footer__brand"><img src="assets/icon.png" alt="" width="26" height="26"> Snowpuff</span>
+      <span class="footer__brand"><img src="assets/icon.png" alt="" width="24" height="24"> Snowpuff</span>
       <span class="footer__links">
-        <a href="https://t.me/hhrrzz1">Поддержать автора ♥</a>
-        <a href="https://ehroz.pro">Другие приложения — ehroz.pro</a>
-        <a href="https://github.com/ehroz1/Snowpuff">Исходники на GitHub</a>
+        <a href="https://t.me/hhrrzz1" data-i18n="foot.support">Поддержать автора ♥</a>
+        <a href="https://ehroz.pro" data-i18n="foot.more">Другие приложения — ehroz.pro</a>
+        <a href="https://github.com/ehroz1/Snowpuff" data-i18n="foot.source">Исходники на GitHub</a>
+        <button class="lang lang--foot" type="button" data-lang-switch>English</button>
       </span>
-      <span class="footer__credit">Сделано <a href="https://ehroz.pro">ehroz.pro</a> · Основан на <a href="https://github.com/mbezruchko/Snowhush">Snowhush</a> (MIT)</span>
+      <span class="footer__credit" data-i18n="foot.credit">Сделано <a href="https://ehroz.pro">ehroz.pro</a> · основано на&nbsp;<a href="https://github.com/mbezruchko/Snowhush">Snowhush</a> (MIT)</span>
     </div>
   </footer>
 
+  <script src="site.js"></script>
   <script src="snow.js"></script>
 </body>
 </html>
