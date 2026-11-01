@@ -33,4 +33,13 @@
   });
 
   document.addEventListener("langchange", render);
+
+  // the menu bar clock shows the visitor's time
+  function tick() {
+    const opts = { weekday: "short", hour: "2-digit", minute: "2-digit" };
+    const text = new Date().toLocaleString(window.I18N.lang === "ru" ? "ru-RU" : "en-US", opts);
+    document.querySelectorAll("[data-clock]").forEach((el) => { el.textContent = text; });
+  }
+  document.addEventListener("langchange", tick);
+  setInterval(tick, 30000);
 })();
