@@ -27,7 +27,9 @@
   const shards = [];
   const pointer = { x: -1e4, y: -1e4, vx: 0, vy: 0, speed: 0, active: false, t: 0 };
   let layoutKey = "";
-  let blow = 0;                  // microphone gust strength, 0…1
+  let blow = 0;                  // gust strength now, 0…1
+  let micBlow = 0;               // from the microphone
+  let gust = 0;                  // from the "blow" button
 
   // ---------- sprites ----------
   function sprite(color, size) {
@@ -72,15 +74,21 @@
     if (n === s.h.length) return;
     const old = s.h;
     const h = new Float32Array(n);
-    if (old.length) {
-      for (let i = 0; i < n; i++) h[i] = old[Math.min(old.length - 1, Math.floor((i / n) * old.length))];
-    } else if (s.seed) {
+    // the drift this surface settles back to: it never melts below it, and refills to it while it snows
+    const base = new Float32Array(n);
+    if (s.seed) {
       for (let i = 0; i < n; i++) {
         const edge = Math.min(1, Math.min(i, n - 1 - i) / 10);
-        h[i] = Math.max(0, s.seed * (0.72 + 0.35 * noise(i, s.seed)) * edge);
+        base[i] = Math.max(0, s.seed * (0.72 + 0.35 * noise(i, s.seed)) * edge);
       }
     }
+    if (old.length) {
+      for (let i = 0; i < n; i++) h[i] = old[Math.min(old.length - 1, Math.floor((i / n) * old.length))];
+    } else {
+      h.set(base);
+    }
     s.h = h;
+    s.base = base;
     s.width = rect.width;
     s.icicles = [];
     if (s.hasIcicles) {
@@ -188,7 +196,12 @@
       if (settings.melt) {
         const falling = RATES[settings.rate] / 380;
         const pace = 0.04 + 0.05 * falling;
-        for (let i = 0; i < n; i++) h[i] = Math.max(0, h[i] - dt * (pace + h[i] * 0.01 * (0.5 + falling)));
+        for (let i = 0; i < n; i++) {
+          if (h[i] > s.base[i]) h[i] = Math.max(s.base[i], h[i] - dt * (pace + h[i] * 0.01 * (0.5 + falling)));
+        }
+      }
+      if (settings.accumulate && settings.rate !== "off" && surfaceOn(s)) {
+        for (let i = 0; i < n; i++) if (h[i] < s.base[i]) h[i] = Math.min(s.base[i], h[i] + dt * 1.4);
       }
 
       // icicles grow under snow
@@ -365,6 +378,9 @@
 
     const lights = beams();
     const card = settings.warm ? document.getElementById("card").getBoundingClientRect() : null;
+    // keep the snow quiet behind the hero text so it stays readable
+    const copyEl = document.getElementById("hero-copy");
+    const copy = copyEl ? copyEl.getBoundingClientRect() : null;
 
     // flakes
     for (const f of flakes) {
@@ -379,6 +395,7 @@
       if (card && img === SNOW && f.x > card.left - 70 && f.x < card.right + 70 && f.y > card.top - 70 && f.y < card.bottom + 70) {
         img = WARM; a = Math.min(1, f.alpha * 1.1);
       }
+      if (copy && f.x > copy.left - 30 && f.x < copy.right + 30 && f.y > copy.top - 30 && f.y < copy.bottom + 30) a *= 0.3;
       const size = f.r * 3.2;
       ctx.globalAlpha = a;
       ctx.drawImage(img, f.x - size / 2, f.y - size / 2, size, size);
@@ -433,12 +450,12 @@
     ctx.closePath();
 
     const g = ctx.createLinearGradient(0, base - s.max, 0, base);
-    g.addColorStop(0, "#F7F9FC");
+    g.addColorStop(0, "#FDFEFF");
     if (s.kind === "ground") {
-      g.addColorStop(1, "#DCE3EC");
+      g.addColorStop(1, "#EAF0F8");
     } else {
-      g.addColorStop(0.6, "#E9EEF5");
-      g.addColorStop(1, "#C7D1DE");
+      g.addColorStop(0.6, "#EDF2F9");
+      g.addColorStop(1, "#C6D4E8");
     }
     ctx.fillStyle = g;
     ctx.shadowColor = "rgba(190, 210, 235, 0.3)";
@@ -484,6 +501,8 @@
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     if (settings.puff) listen();
+    gust = Math.max(0, gust - dt * 0.7);
+    blow = Math.max(micBlow, gust);
     step(dt);
     draw();
     requestAnimationFrame(frame);
@@ -556,7 +575,7 @@
     audio.stream.getTracks().forEach((t) => t.stop());
     audio.ac.close();
     audio = null;
-    blow = 0;
+    micBlow = 0;
   }
   function listen() {
     if (!audio) return;
@@ -565,7 +584,7 @@
     for (const v of audio.buf) sum += v * v;
     const rms = Math.sqrt(sum / audio.buf.length);
     audio.level = audio.level * 0.7 + rms * 0.3;
-    blow = Math.max(0, Math.min(1, (audio.level - 0.06) * 6));
+    micBlow = Math.max(0, Math.min(1, (audio.level - 0.06) * 6));
   }
 
   // ---------- menu ----------
@@ -577,6 +596,8 @@
     sync();
   }
   puffButtons.forEach((b) => b.addEventListener("click", togglePuff));
+  // one breath without the microphone
+  document.querySelectorAll("[data-gust]").forEach((b) => b.addEventListener("click", () => { gust = 0.95; }));
 
   function sync() {
     puffButtons.forEach((b) => b.setAttribute("aria-pressed", String(settings.puff)));
